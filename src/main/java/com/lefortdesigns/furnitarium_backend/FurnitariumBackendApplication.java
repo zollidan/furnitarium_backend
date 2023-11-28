@@ -16,5 +16,4 @@ public class FurnitariumBackendApplication {
     public ModelMapper modelMapper(){
         return new ModelMapper();
     }
-
 }

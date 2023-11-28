@@ -1,8 +1,6 @@
 package com.lefortdesigns.furnitarium_backend.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
 

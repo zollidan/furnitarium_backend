@@ -1,6 +1,5 @@
 package com.lefortdesigns.furnitarium_backend.config;
 
-
 import com.lefortdesigns.furnitarium_backend.services.PersonDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,45 +23,38 @@ public class SecurityConfig {
     private final PersonDetailsService personDetailsService;
     private final JWTFilter jwtFilter;
 
-
-
     @Autowired
     public SecurityConfig(PersonDetailsService personDetailsService, JWTFilter jwtFilter) {
         this.personDetailsService = personDetailsService;
         this.jwtFilter = jwtFilter;
     }
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/admin").hasRole("ADMIN")
-                        .requestMatchers("/auth/signin", "/auth/reg", "/auth/login").permitAll()
-                        .anyRequest()
-                        .hasAnyRole("USER", "ADMIN")
-                )
-                .formLogin(login -> login
-                        .loginPage("/auth/login")
-                        .loginProcessingUrl("/login_process")
-                        .defaultSuccessUrl("/api/user", true)
-                        .failureUrl("/auth/login?error")
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/auth/login")
-                )
-                .sessionManagement(sessionManagement -> sessionManagement
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+                        .anyRequest().permitAll());
+//                        .requestMatchers("/api/admin").hasRole("ADMIN")
+//                        .requestMatchers("/auth/signin", "/auth/reg", "/auth/login").permitAll()
+//                        .anyRequest()
+//                        .hasAnyRole("USER", "ADMIN"))
+//                .formLogin(login -> login
+//                        .loginPage("/auth/login")
+//                        .loginProcessingUrl("/login_process")
+//                        .defaultSuccessUrl("/api/user", true)
+//                        .failureUrl("/auth/login?error"))
+//                .logout(logout -> logout
+//                        .logoutUrl("/logout")
+//                        .logoutSuccessUrl("/auth/login")) // почти уверен что тут ошибка в роутинге, потому что лог аут идеи на логин которого нет и на который я запрашиваю
+//                .sessionManagement(sessionManagement -> sessionManagement
+//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    protected void authManager (AuthenticationManagerBuilder auth) throws Exception {
+    protected void authManager(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(personDetailsService)
                 .passwordEncoder(getPasswordEncoder());
     }
@@ -73,7 +65,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }

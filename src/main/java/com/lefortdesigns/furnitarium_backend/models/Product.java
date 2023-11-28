@@ -30,7 +30,7 @@ public class Product {
     private String product_image;
 
     @Column
-    private int category_id;
+    private int categoryId;
 
     @Column
     private String product_description;

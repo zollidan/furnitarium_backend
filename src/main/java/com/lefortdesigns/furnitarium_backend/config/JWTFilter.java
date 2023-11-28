@@ -19,7 +19,6 @@ import java.io.IOException;
 @Component
 public class JWTFilter extends OncePerRequestFilter {
 
-
     private final JwtUtil jwtUtil;
 
     private final PersonDetailsService personDetailsService;
@@ -31,26 +30,30 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.isBlank() && authHeader.startsWith("Bearer ")) {
             String jwt = authHeader.substring(7);
 
-            if (jwt.isBlank()){
-                response.sendError(response.SC_BAD_REQUEST, "invalid token in Bearer request");
-            }else {
+            if (jwt.isBlank()) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid token in Bearerrequest");
+            } else {
                 try {
                     String username = jwtUtil.validateTokenAndGetClaim(jwt);
                     UserDetails userDetails = personDetailsService.loadUserByUsername(username);
 
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, userDetails.getPassword(),
+                            userDetails.getAuthorities());
 
-                    if(SecurityContextHolder.getContext().getAuthentication() == null){
+                    if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     }
-                }catch (JWTVerificationException exception){
-                    response.sendError(response.SC_BAD_REQUEST, "invalid JWT token you are aboba and i guess token expired");
+                } catch (JWTVerificationException exception) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                            "invalid JWT token you are aboba and i guess token expired");
                 }
             }
         }

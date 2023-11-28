@@ -27,8 +27,8 @@ public class Person {
     private String password;
     @Column
     private String role;
-//    @Column
-//    private boolean newsletter;
+    @Column
+    private int newsletter;
 
 
 }

@@ -3,7 +3,6 @@ package com.lefortdesigns.furnitarium_backend.models;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name = "orders")
@@ -15,22 +14,25 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(columnDefinition="DATE")
-    private String order_date;
+    @Column(columnDefinition = "DATE")
+    private String orderDate;
 
     @Column
-    private float total_cost;
+    private float totalCost;
 
-    @Column(columnDefinition="VARCHAR(20)")
+    @Column(columnDefinition = "VARCHAR(20)")
     private String payment;
 
-    @Column(columnDefinition="VARCHAR(20)")
-    private String payment_method;
+    @Column(columnDefinition = "VARCHAR(20)")
+    private String paymentMethod;
 
     @Column
-    private int production_id;
+    private int productionId;
 
     @Column
-    private int customer_id;
+    private int customerId;
+
+    @Column
+    private int orderStatus;
 
 }

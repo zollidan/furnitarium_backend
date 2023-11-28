@@ -1,15 +1,14 @@
 package com.lefortdesigns.furnitarium_backend.conrollers;
 
-import com.lefortdesigns.furnitarium_backend.dto.AuthDto;
-import com.lefortdesigns.furnitarium_backend.dto.PersonDto;
 import com.lefortdesigns.furnitarium_backend.models.Person;
 import com.lefortdesigns.furnitarium_backend.security.JwtUtil;
+import com.lefortdesigns.furnitarium_backend.security.PersonDetails;
 import com.lefortdesigns.furnitarium_backend.services.RegService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -25,43 +24,30 @@ public class SecurityController {
     private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public SecurityController(RegService regService, JwtUtil jwtUtil, ModelMapper modelMapper, AuthenticationManager authenticationManager) {
+    public SecurityController(RegService regService, JwtUtil jwtUtil, ModelMapper modelMapper,
+                              AuthenticationManager authenticationManager) {
         this.regService = regService;
         this.jwtUtil = jwtUtil;
         this.modelMapper = modelMapper;
         this.authenticationManager = authenticationManager;
     }
 
-    @PostMapping("/login_process")
-    public Map<String, Object> perfomLogin(@RequestBody AuthDto authDto){
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                new UsernamePasswordAuthenticationToken(authDto.getUsername(), authDto.getPassword());
-
-        try {
-            authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-        }catch (BadCredentialsException e){
-            return Map.of("message", "BadCredentialsException");
-        }
-
-        String token = jwtUtil.generateToken(authDto.getUsername());
-        return Map.of("jwt-token", token);
-    }
-
-
 
     @PostMapping("/reg")
-    public Map<String, String > postReg(@RequestBody Person person){
+    public Map<String, String> postReg(@RequestBody Person person) {
         regService.register(person);
 
         String token = jwtUtil.generateToken(person.getEmail());
 
-
-
         return Map.of("jwt-token", token);
     }
 
-    public Person convertToPerson(PersonDto personDto){
-        return this.modelMapper.map(personDto, Person.class);
+    @GetMapping("/user")
+    public Person getUserInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        PersonDetails personDetails = (PersonDetails) authentication.getPrincipal();
+        // System.out.println(personDetails.getPerson());
+        return personDetails.getPerson();
     }
 
 }
