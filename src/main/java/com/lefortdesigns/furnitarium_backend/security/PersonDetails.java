@@ -1,13 +1,14 @@
 package com.lefortdesigns.furnitarium_backend.security;
 
-import com.lefortdesigns.furnitarium_backend.models.Person;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
+import com.lefortdesigns.furnitarium_backend.models.Person;
 
 public class PersonDetails implements UserDetails {
 
@@ -30,6 +31,7 @@ public class PersonDetails implements UserDetails {
 
     @Override
     public String getUsername() {
+
         return this.person.getEmail();
     }
 

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form name="f" action="/process_login" method="post">
+      <div class="container">
+        <label for="uname"><b>Email</b></label>
+        <input type="text" placeholder="Enter Email" name="username" required />
+
+        <label for="psw"><b>Password</b></label>
+        <input
+          type="password"
+          placeholder="Enter Password"
+          name="password"
+          required
+        />
+
+        <button type="submit">Login</button>
+        <div th:if="${param.error}" style="color: brown">
+          неправильное имя или пароль
+        </div>
+      </div>
+    </form>
+  </body>
+</html>

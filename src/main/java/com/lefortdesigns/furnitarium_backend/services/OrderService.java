@@ -9,20 +9,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class OderService {
+public class OrderService {
 
     private final OrderRepostory orderRepostory;
 
     @Autowired
-    public OderService(OrderRepostory orderRepostory) {
+    public OrderService(OrderRepostory orderRepostory) {
         this.orderRepostory = orderRepostory;
     }
 
-    public List<Order> showAllOrders(){
+    public List<Order> showAllOrders() {
         return orderRepostory.findAll();
     }
 
-    public Optional<Order> findOrderById(Long orderId){
+    public Optional<Order> findOrderById(Long orderId) {
         return orderRepostory.findById(orderId);
     }
 }

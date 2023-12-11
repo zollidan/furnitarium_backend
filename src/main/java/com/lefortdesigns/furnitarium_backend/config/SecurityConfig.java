@@ -1,6 +1,5 @@
 package com.lefortdesigns.furnitarium_backend.config;
 
-import com.lefortdesigns.furnitarium_backend.services.PersonDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,54 +9,58 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.lefortdesigns.furnitarium_backend.services.PersonDetailsService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final PersonDetailsService personDetailsService;
-    private final JWTFilter jwtFilter;
 
     @Autowired
-    public SecurityConfig(PersonDetailsService personDetailsService, JWTFilter jwtFilter) {
+    public SecurityConfig(PersonDetailsService personDetailsService) {
         this.personDetailsService = personDetailsService;
-        this.jwtFilter = jwtFilter;
+    }
+
+    @Bean
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http
+                .getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.userDetailsService(personDetailsService)
+                .passwordEncoder(getPasswordEncoder());
+        return authenticationManagerBuilder.build();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll());
-//                        .requestMatchers("/api/admin").hasRole("ADMIN")
-//                        .requestMatchers("/auth/signin", "/auth/reg", "/auth/login").permitAll()
-//                        .anyRequest()
-//                        .hasAnyRole("USER", "ADMIN"))
-//                .formLogin(login -> login
-//                        .loginPage("/auth/login")
-//                        .loginProcessingUrl("/login_process")
-//                        .defaultSuccessUrl("/api/user", true)
-//                        .failureUrl("/auth/login?error"))
-//                .logout(logout -> logout
-//                        .logoutUrl("/logout")
-//                        .logoutSuccessUrl("/auth/login")) // почти уверен что тут ошибка в роутинге, потому что лог аут идеи на логин которого нет и на который я запрашиваю
-//                .sessionManagement(sessionManagement -> sessionManagement
-//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("/auth/login", "/error", "/process_login", "/auth/registration")
+                        .permitAll()
+                        .anyRequest().authenticated()
+                        .anyRequest().hasAnyRole("USER", "ADMIN"))
+                .formLogin(login -> login
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/process_login")
+                        .defaultSuccessUrl("/hello")
+                        .failureForwardUrl("/auth/login?error"))
+                .logout(logout -> logout
+                        .logoutUrl("/logout"));
 
-//        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+
     }
 
-    protected void authManager(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(personDetailsService)
-                .passwordEncoder(getPasswordEncoder());
-    }
+    // protected void authManager(AuthenticationManagerBuilder auth) throws
+    // Exception {
+    // auth.userDetailsService(personDetailsService)
+    // .passwordEncoder(getPasswordEncoder());
+    // }
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
