@@ -77,6 +77,7 @@ public class SecurityConfig {
         }
 
         // @Bean
+        // @Override
         // public AuthenticationManager authenticationManagerBean() throws Exception {
         // return super.authenticationManagerBean();
         // }
