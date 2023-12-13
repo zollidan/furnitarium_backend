@@ -1,30 +1,41 @@
 package com.lefortdesigns.furnitarium_backend.conrollers;
 
+import java.util.Map;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.lefortdesigns.furnitarium_backend.dto.PersonDto;
 import com.lefortdesigns.furnitarium_backend.models.Person;
+import com.lefortdesigns.furnitarium_backend.security.JwtUtil;
 import com.lefortdesigns.furnitarium_backend.services.RegistrationService;
 import com.lefortdesigns.furnitarium_backend.util.PersonValidator;
 
 import jakarta.validation.Valid;
 
-@Controller
+@RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final PersonValidator personValidator;
     private final RegistrationService registrationService;
+    private final JwtUtil jwtUtil;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public AuthController(PersonValidator personValidator, RegistrationService registrationService) {
+    public AuthController(PersonValidator personValidator, RegistrationService registrationService, JwtUtil jwtUtil,
+            ModelMapper modelMapper) {
         this.personValidator = personValidator;
         this.registrationService = registrationService;
+        this.jwtUtil = jwtUtil;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/login")
@@ -38,16 +49,33 @@ public class AuthController {
     }
 
     @PostMapping("/registration")
-    public String registrationPerfome(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
+    public Map<String, String> registrationPerfome(@RequestBody @Valid PersonDto personDto,
+            BindingResult bindingResult) {
+
+        Person person = covertToPerson(personDto);
 
         personValidator.validate(person, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            return "/auth/registration";
+            return Map.of("error", "error of registration");
         }
 
         registrationService.registration(person);
-        return "redirect:/auth/login";
+
+        String token = jwtUtil.generateToken(person.getEmail());
+
+        return Map.of("jwt-token", token);
     }
 
+    // @PostMapping("/login")
+    // public Map<String, String> performingLogin(@RequestBody AuthenticationDto
+    // authenticationDto){
+    // UsernamePasswordAuthenticationToken authenticationToken = new
+    // UsernamePasswordAuthenticationToken(authenticationDto,
+    // authenticationDto.getEmail());
+    // }
+
+    public Person covertToPerson(PersonDto personDto) {
+        return this.modelMapper.map(personDto, Person.class);
+    }
 }
